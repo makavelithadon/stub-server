@@ -434,6 +434,13 @@ describe('express request handler', () => {
       expect(res.body).toEqual({});
       expect(res.text).toEqual('');
     });
+
+    test('with req.body payload', async () => {
+      const newUser = { first: 'John', last: 'DOE' };
+      const res = await request(app).post('/post/express/ts/user').send(newUser);
+      expect(res.status).toBe(201);
+      expect(res.body).toEqual({});
+    });
   });
 
   test('js', async () => {

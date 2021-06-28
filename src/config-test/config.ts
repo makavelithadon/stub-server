@@ -80,6 +80,9 @@ const config: StubServerConfig = {
     '/function/:param': {
       GET: { response: req => `${stubsPath}/GET_function_200_OK-${req.params.param}.json` },
       POST: req => `${stubsPath}/POST_function_201_Created-${req.params.param}.json`
+    },
+    '/post/express/ts/user': {
+      POST: `${stubsPath}/POST_create_user_201_OK.ts`
     }
   }
 };

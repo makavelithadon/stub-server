@@ -152,6 +152,10 @@ export function stubServer(configPath: string, app: express.Application) {
   // Do not use asynchronous code here otherwise routes will
   // be defined after the ones from webpack-dev-server
 
+  // Use body-parser to parse req.body
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+
   _configPath = configPath;
 
   const { routes } = getConfig();
