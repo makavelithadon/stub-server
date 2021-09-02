@@ -44,7 +44,7 @@ async function randomDelay(min: number, max: number) {
   return delay;
 }
 
-const isUrl = (str: string) => str.startsWith('http');
+const isUrl = (n: any) => typeof n === 'string' && n.startsWith('http');
 
 let _configPath: string;
 
@@ -80,7 +80,13 @@ async function parseConfig(apiPath: string, req: express.Request) {
   } else if (typeof stub === 'function') {
     name = stub(req);
   } else {
-    name = typeof stub.response === 'function' ? stub.response(req) : stub.response;
+    // @ts-ignore
+    name =
+      typeof stub.response === 'function'
+        ? stub.response(req)
+        : isObject(stub)
+        ? stub
+        : stub.response;
     delay = stub.delay;
     req.headers = { ...req.headers, ...stub.headers };
   }
@@ -95,6 +101,14 @@ async function parseConfig(apiPath: string, req: express.Request) {
   return name;
 }
 
+function isObject(n: any) {
+  return Object.prototype.toString.call(n);
+}
+
+function isProxyfiedStub(stubName: any) {
+  return isUrl(stubName) || (isObject(stubName) && isUrl(stubName?.proxyOptions?.target));
+}
+
 async function processStubRequest(
   apiPath: string,
   req: express.Request,
@@ -103,9 +117,8 @@ async function processStubRequest(
 ) {
   const stubName = await parseConfig(apiPath, req);
 
-  if (isUrl(stubName)) {
-    const url = stubName;
-    send(url, req, res, next);
+  if (isProxyfiedStub(stubName)) {
+    send(stubName, req, res, next);
   } else {
     const filename = stubName;
 
